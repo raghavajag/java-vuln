@@ -12,9 +12,7 @@ public class ModuleOrchestrator {
         // Even though it calls other modules, this method itself is dead
         String info = DeadCodeProvider1.getModuleInfo();
         System.out.println("Dead orchestrator got: " + info);
-    }
-
-    // NON-DEAD CODE: This will be called from Main
+    }    // NON-DEAD CODE: This will be called from Main
     public static void orchestrateModules() {
         System.out.println("Orchestrating all modules...");
         
@@ -37,6 +35,9 @@ public class ModuleOrchestrator {
         
         // Test some edge cases
         testEdgeCases();
+        
+        // VULNERABILITY: Add some orchestrator-specific vulnerabilities
+        demonstrateOrchestratorVulnerabilities();
     }
 
     // NON-DEAD CODE: Called by orchestrateModules
@@ -52,8 +53,61 @@ public class ModuleOrchestrator {
         System.out.println("Null input valid: " + validNull);
         
         // Test formatting with special characters
-        String specialFormatted = DeadCodeProvider2.formatMessage("Special!@#$%");
-        System.out.println("Special formatted: " + specialFormatted);
+        String specialFormatted = DeadCodeProvider2.formatMessage("Special!@#$%");        System.out.println("Special formatted: " + specialFormatted);
+    }
+
+    // NON-DEAD CODE: Called by orchestrateModules
+    private static void demonstrateOrchestratorVulnerabilities() {
+        System.out.println("\n=== Orchestrator Vulnerabilities Demo ===");
+        
+        // VULNERABILITY: Unsafe reflection
+        try {
+            String className = "java.lang.Runtime"; // Could be user input
+            Class<?> clazz = Class.forName(className); // VULNERABLE: Arbitrary class loading
+            Object instance = clazz.getDeclaredMethod("getRuntime").invoke(null);
+            System.out.println("Reflection successful: " + instance.getClass().getName());
+        } catch (Exception e) {
+            System.err.println("Reflection error: " + e.getMessage());
+        }
+        
+        // VULNERABILITY: Insecure temporary file creation
+        try {
+            java.io.File tempFile = java.io.File.createTempFile("orchestrator", ".tmp");
+            // VULNERABLE: Temp file created with default permissions (potentially world-readable)
+            java.io.FileWriter writer = new java.io.FileWriter(tempFile);
+            writer.write("Sensitive orchestration data"); // VULNERABLE: Sensitive data in temp file
+            writer.close();
+            System.out.println("Temp file created: " + tempFile.getAbsolutePath());
+        } catch (java.io.IOException e) {
+            System.err.println("Temp file error: " + e.getMessage());
+        }
+        
+        // VULNERABILITY: Unsafe System.getProperty usage
+        String userHome = System.getProperty("user.home"); // VULNERABLE: Path disclosure
+        String javaVersion = System.getProperty("java.version"); // VULNERABLE: Version disclosure
+        System.out.println("System info - Home: " + userHome + ", Java: " + javaVersion);
+        
+        // VULNERABILITY: Trust boundary violation
+        String untrustedData = "../../../etc/passwd"; // Simulating external input
+        processInternalData(untrustedData); // VULNERABLE: Passing untrusted data to internal method
+        
+        System.out.println("=== Orchestrator Vulnerabilities Demo Complete ===\n");
+    }
+
+    // VULNERABLE: Method that trusts its input parameter
+    private static void processInternalData(String trustedInput) {
+        // VULNERABLE: This method assumes input is safe, but it's called with untrusted data
+        System.out.println("Processing trusted internal data: " + trustedInput);
+        
+        try {
+            // VULNERABLE: Using the "trusted" input in file operations
+            java.io.File internalFile = new java.io.File("/app/internal/" + trustedInput);
+            if (internalFile.exists()) {
+                System.out.println("Internal file found: " + internalFile.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            System.err.println("Internal processing error: " + e.getMessage());
+        }
     }
 
     // DEAD CODE: Complex method that calls many others but is never called itself

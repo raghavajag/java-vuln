@@ -79,20 +79,17 @@ public class Main {
             // dead if static analysis can't determine the random condition
             VulnerableApp.complexCrossModuleInteraction();
         }
-    }
-
-    public static void vulnerableMethod(String userInput) {
-        // Vulnerability: Path Traversal
+    }    public static void vulnerableMethod(String userInput) {
+        // Vulnerability 1: Path Traversal
         // If userInput is something like "../../etc/passwd", it could read sensitive files.
         String basePath = "/tmp/user_files/"; // Intended base directory
-        File userFile = new File(basePath + userInput);
+        File userFile = new File(basePath + userInput); // VULNERABLE: Direct concatenation
 
         System.out.println("Attempting to read file: " + userFile.getAbsolutePath());
 
         if (userFile.exists() && !userFile.isDirectory()) {
             try {
-                // In a real scenario, ensure canonical path is within basePath before reading
-                // For this demo, we'll keep it simple to show the vulnerability
+                // VULNERABLE: No path validation before reading
                 String content = new String(Files.readAllBytes(Paths.get(userFile.getAbsolutePath())));
                 System.out.println("File Content:\n" + content);
             } catch (IOException e) {
@@ -100,6 +97,17 @@ public class Main {
             }
         } else {
             System.out.println("File not found or is a directory: " + userFile.getAbsolutePath());
+        }
+
+        // Vulnerability 2: Command Injection
+        try {
+            // VULNERABLE: Directly using user input in command execution
+            Runtime runtime = Runtime.getRuntime();
+            String command = "ls -la " + userInput; // VULNERABLE: User input in command
+            Process process = runtime.exec(command);
+            System.out.println("Command executed: " + command);
+        } catch (IOException e) {
+            System.err.println("Command execution failed: " + e.getMessage());
         }
     }
 

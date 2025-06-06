@@ -21,6 +21,129 @@ public class VulnerableApp {
         
         // Call internal method
         processUnsafeData("../../../etc/passwd");
+        
+        // VULNERABILITY: Call database vulnerabilities
+        testDatabaseVulnerabilities();
+          // VULNERABILITY: Call web vulnerabilities  
+        testWebVulnerabilities();
+        
+        // VULNERABILITY: Call crypto vulnerabilities
+        testCryptoVulnerabilities();
+    }
+
+    // NON-DEAD CODE: Called by runVulnerableOperations
+    private static void testDatabaseVulnerabilities() {
+        System.out.println("\n=== Testing Database Vulnerabilities ===");
+        
+        // VULNERABLE: SQL injection through user lookup
+        String result1 = DatabaseVulnerabilities.vulnerableUserLookup("admin' OR '1'='1");
+        System.out.println("Vulnerable lookup result: " + result1);
+        
+        // VULNERABLE: SQL injection in search
+        String result2 = DatabaseVulnerabilities.searchUsers("test", "id; DROP TABLE users--");
+        System.out.println("Search result: " + result2);
+        
+        // VULNERABLE: Update with injection
+        DatabaseVulnerabilities.updateUserRole("user1'; DROP TABLE logs; --", "admin");
+        
+        // VULNERABLE: Login with credential exposure
+        String loginResult = DatabaseVulnerabilities.loginUser("admin", "password123");
+        System.out.println("Login result: " + loginResult);
+        
+        System.out.println("=== Database Vulnerabilities Test Complete ===\n");
+    }
+
+    // NON-DEAD CODE: Called by runVulnerableOperations
+    private static void testWebVulnerabilities() {
+        System.out.println("\n=== Testing Web Vulnerabilities ===");
+        
+        // VULNERABLE: XSS in user profile
+        String profile = WebVulnerabilities.generateUserProfile(
+            "<script>alert('XSS')</script>", 
+            "<img src=x onerror=alert('XSS')>"
+        );
+        System.out.println("Generated profile with XSS: " + profile.length() + " chars");
+        
+        // VULNERABLE: SSRF attempt
+        String ssrfResult = WebVulnerabilities.fetchExternalData("http://169.254.169.254/metadata");
+        System.out.println("SSRF result length: " + ssrfResult.length());
+        
+        // VULNERABLE: Weak encryption
+        String weakHash = WebVulnerabilities.weakEncryption("sensitive_password");
+        System.out.println("Weak hash: " + weakHash);
+        
+        // VULNERABLE: Hardcoded credentials usage
+        String serviceConnection = WebVulnerabilities.connectToService();
+        System.out.println("Service connection: " + serviceConnection);
+        
+        // VULNERABLE: Information disclosure in logs
+        WebVulnerabilities.processLogin("admin", "secret123", "tok_abc123def456");
+        
+        // VULNERABLE: Directory traversal
+        String configContent = WebVulnerabilities.readConfigFile("../../../etc/passwd");
+        System.out.println("Config read attempt result length: " + configContent.length());
+        
+        // VULNERABLE: Race condition
+        for (int i = 0; i < 3; i++) {
+            String counterResult = WebVulnerabilities.incrementCounter("user" + i);
+            System.out.println("Counter: " + counterResult);
+        }
+        
+        // VULNERABLE: Input validation issues
+        String ageResult1 = WebVulnerabilities.processAge("25");
+        String ageResult2 = WebVulnerabilities.processAge("invalid_age");
+        String ageResult3 = WebVulnerabilities.processAge("-5");        System.out.println("Age results: " + ageResult1 + ", " + ageResult2 + ", " + ageResult3);
+        
+        System.out.println("=== Web Vulnerabilities Test Complete ===\n");
+    }
+
+    // NON-DEAD CODE: Called by runVulnerableOperations
+    private static void testCryptoVulnerabilities() {
+        System.out.println("\n=== Testing Crypto Vulnerabilities ===");
+        
+        // VULNERABLE: Weak password hashing
+        String weakHash = CryptoVulnerabilities.hashPassword("admin123");
+        System.out.println("Weak password hash: " + weakHash);
+        
+        // VULNERABLE: Insecure encryption
+        String encrypted = CryptoVulnerabilities.encryptData("sensitive_data_12345");
+        System.out.println("Weakly encrypted data: " + encrypted);
+        
+        // VULNERABLE: Predictable API key generation
+        String apiKey1 = CryptoVulnerabilities.generateApiKey();
+        String apiKey2 = CryptoVulnerabilities.generateApiKey();
+        System.out.println("Generated API keys: " + apiKey1 + ", " + apiKey2);
+        
+        // VULNERABLE: Weak session token
+        String sessionToken = CryptoVulnerabilities.generateSessionToken();
+        System.out.println("Session token: " + sessionToken);
+        
+        // VULNERABLE: Timing attack vulnerable authentication
+        boolean auth1 = CryptoVulnerabilities.authenticateUser("admin", "admin123");
+        boolean auth2 = CryptoVulnerabilities.authenticateUser("admin", "wrongpass");
+        boolean auth3 = CryptoVulnerabilities.authenticateUser("nonexistent", "pass");
+        System.out.println("Auth results: " + auth1 + ", " + auth2 + ", " + auth3);
+        
+        // VULNERABLE: Weak key derivation
+        byte[] derivedKey = CryptoVulnerabilities.deriveKey("password123", "salt");
+        System.out.println("Derived key length: " + derivedKey.length);
+        
+        // VULNERABLE: ECB mode encryption
+        String ecbEncrypted = CryptoVulnerabilities.encryptWithECB("This is a long message that will show ECB patterns");
+        System.out.println("ECB encrypted: " + ecbEncrypted);
+        
+        // VULNERABLE: Weak password generation
+        String weakPassword = CryptoVulnerabilities.generatePassword(12);
+        System.out.println("Generated weak password: " + weakPassword);
+        
+        // VULNERABLE: Disable SSL validation
+        CryptoVulnerabilities.disableSSLValidation();
+        
+        // VULNERABLE: Always-true certificate validation
+        boolean certValid = CryptoVulnerabilities.validateCertificate("fake_certificate_data");
+        System.out.println("Certificate validation result: " + certValid);
+        
+        System.out.println("=== Crypto Vulnerabilities Test Complete ===\n");
     }
 
     // NON-DEAD CODE: Called by runVulnerableOperations
